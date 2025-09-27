@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb_healthcare
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=administratore
+      - MONGO_INITDB_ROOT_PASSWORD=strongPassword!
+    volumes:
+      - mongodb_data:/data/db
+  
+  data_migrator:
+    build: .
+    container_name: data_migrator_healthcare
+    depends_on:
+      - mongodb
+    environment:
+      - MONGO_HOST=mongodb
+      - MONGO_PORT=27017
+      #Root
+      - MONGO_USER=administratore
+      - MONGO_PASS=strongPassword!
+      #Utilisateurs
+      - MONGO_ADMIN1_PASS=secureAdmin1
+      - MONGO_ADMIN2_PASS=secureAdmin2
+      - MONGO_EDITOR1_PASS=secureEditor1
+      - MONGO_EDITOR2_PASS=secureEditor2
+      - MONGO_READER1_PASS=secureReader1
+      - MONGO_READER2_PASS=secureReader2
+    volumes:
+      - ./healthcare_dataset.csv:/app/healthcare_dataset.csv
+    command: python /app/main.py
+
+volumes:
+  mongodb_data:
