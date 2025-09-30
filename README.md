@@ -36,9 +36,9 @@ Lorsque vous lancez `docker-compose up`, voici les étapes qui s'enchaînent :
     * `data_migrator` : Ce service dépend de `mongodb` et ne démarrera qu'une fois la base de données prête. Il est construit à partir du `Dockerfile` local.
 
 2.  **Construction de l'Image du Migrator** : Docker utilise le `Dockerfile` pour construire l'image du service `data_migrator`.
-    * [cite_start]Il part d'une image Python (`python:3.9-slim`)[cite: 2].
-    * [cite_start]Il copie le fichier `requirements.txt` et installe les dépendances nécessaires [cite: 3][cite_start], à savoir `pymongo` et `pandas`[cite: 1].
-    * [cite_start]Enfin, il copie le script `main.py` qui contient toute la logique de migration[cite: 2].
+    * Il part d'une image Python (`python:3.11-slim`).
+    * Il copie le fichier `requirements.txt` et installe les dépendances nécessaires, à savoir `pymongo` et `pandas`.
+    * Enfin, il copie le script `main.py` qui contient toute la logique de migration.
 
 3.  **Exécution du Script `main.py`** : Une fois le conteneur `data_migrator_healthcare` lancé, le script `main.py` s'exécute et effectue les opérations suivantes :
 
@@ -50,5 +50,5 @@ Lorsque vous lancez `docker-compose up`, voici les étapes qui s'enchaînent :
     * **Migration des Données** :
         * Le script vérifie si la collection `patients` contient déjà des documents. Si c'est le cas, il la vide complètement (`delete_many({})`).
         * Les données du DataFrame Pandas sont converties en une liste de dictionnaires et insérées en masse (`insert_many(data)`) dans la collection `patients`.
-    * **Vérification** : Pour confirmer que l'opération a réussi, le script affiche les 5 premiers documents de la collection dans les logs du conteneur.
+    * **Vérification** : Pour confirmer que l'opération a réussi, le script affiche les 5 premiers documents de la collection dans les logs du conteneur et vérifie que le nombre d'entrées dans la base correspond bien au nombre initial après déduplication.
     * **Fin du Processus** : La connexion à la base de données est fermée (`client.close()`), le script se termine, et le conteneur `data_migrator_healthcare` s'arrête.
