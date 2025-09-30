@@ -15,8 +15,17 @@ Le script principal (`main.py`) ne se contente pas de transférer les données ;
 * **Docker Compose**
 
 ### Lancement
-1.  Assurez-vous que le fichier source `healthcare_dataset.csv` est présent à la racine du projet.
-2.  Ouvrez un terminal et exécutez la commande suivante :
+1.  Assurez-vous que le fichier source `healthcare_dataset.csv` est présent dans le dossier migration du projet.
+2.  Il faut créer à la racine le fichier `.env` dans lequel vous allez définir le nom d'utilisateur de l'admin, les mot de passes des utilisateurs:
+   - MONGO_USER
+   - MONGO_PASS
+   - MONGO_ADMIN1_PASS
+   - MONGO_ADMIN2_PASS
+   - MONGO_EDITOR1_PASS
+   - MONGO_EDITOR2_PASS
+   - MONGO_READER1_PASS
+   - MONGO_READER2_PASS
+4.  Ouvrez un terminal et exécutez la commande suivante :
     ```bash
     docker-compose up --build
     ```
@@ -32,7 +41,7 @@ docker-compose down
 Lorsque vous lancez `docker-compose up`, voici les étapes qui s'enchaînent :
 
 1.  **Orchestration Docker Compose** : Le fichier `docker-compose.yml` définit deux services principaux.
-    * `mongodb` : Lance un conteneur basé sur l'image `mongo:latest`. Les identifiants de l'utilisateur root (`administratore` et `strongPassword!`) sont définis via des variables d'environnement. Un volume nommé `mongodb_data` est utilisé pour assurer la persistance des données.
+    * `mongodb` : Lance un conteneur basé sur l'image `mongo:latest`. Un volume nommé `mongodb_data` est utilisé pour assurer la persistance des données.
     * `data_migrator` : Ce service dépend de `mongodb` et ne démarrera qu'une fois la base de données prête. Il est construit à partir du `Dockerfile` local.
 
 2.  **Construction de l'Image du Migrator** : Docker utilise le `Dockerfile` pour construire l'image du service `data_migrator`.
