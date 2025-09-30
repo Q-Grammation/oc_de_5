@@ -1,5 +1,5 @@
 # Utilise une image Python légère
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 # Définit le répertoire de travail dans le conteneur
 WORKDIR /app

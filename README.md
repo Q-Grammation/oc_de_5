@@ -15,8 +15,17 @@ Le script principal (`main.py`) ne se contente pas de transférer les données ;
 * **Docker Compose**
 
 ### Lancement
-1.  Assurez-vous que le fichier source `healthcare_dataset.csv` est présent à la racine du projet.
-2.  Ouvrez un terminal et exécutez la commande suivante :
+1.  Assurez-vous que le fichier source `healthcare_dataset.csv` est présent dans le dossier migration du projet.
+2.  Il faut créer à la racine le fichier `.env` dans lequel vous allez définir le nom d'utilisateur de l'admin, les mot de passes des utilisateurs:
+   - MONGO_USER
+   - MONGO_PASS
+   - MONGO_ADMIN1_PASS
+   - MONGO_ADMIN2_PASS
+   - MONGO_EDITOR1_PASS
+   - MONGO_EDITOR2_PASS
+   - MONGO_READER1_PASS
+   - MONGO_READER2_PASS
+4.  Ouvrez un terminal et exécutez la commande suivante :
     ```bash
     docker-compose up --build
     ```
@@ -32,13 +41,13 @@ docker-compose down
 Lorsque vous lancez `docker-compose up`, voici les étapes qui s'enchaînent :
 
 1.  **Orchestration Docker Compose** : Le fichier `docker-compose.yml` définit deux services principaux.
-    * `mongodb` : Lance un conteneur basé sur l'image `mongo:latest`. Les identifiants de l'utilisateur root (`administratore` et `strongPassword!`) sont définis via des variables d'environnement. Un volume nommé `mongodb_data` est utilisé pour assurer la persistance des données.
+    * `mongodb` : Lance un conteneur basé sur l'image `mongo:latest`. Un volume nommé `mongodb_data` est utilisé pour assurer la persistance des données.
     * `data_migrator` : Ce service dépend de `mongodb` et ne démarrera qu'une fois la base de données prête. Il est construit à partir du `Dockerfile` local.
 
 2.  **Construction de l'Image du Migrator** : Docker utilise le `Dockerfile` pour construire l'image du service `data_migrator`.
-    * [cite_start]Il part d'une image Python (`python:3.9-slim`)[cite: 2].
-    * [cite_start]Il copie le fichier `requirements.txt` et installe les dépendances nécessaires [cite: 3][cite_start], à savoir `pymongo` et `pandas`[cite: 1].
-    * [cite_start]Enfin, il copie le script `main.py` qui contient toute la logique de migration[cite: 2].
+    * Il part d'une image Python (`python:3.11-slim`).
+    * Il copie le fichier `requirements.txt` et installe les dépendances nécessaires, à savoir `pymongo` et `pandas`.
+    * Enfin, il copie le script `main.py` qui contient toute la logique de migration.
 
 3.  **Exécution du Script `main.py`** : Une fois le conteneur `data_migrator_healthcare` lancé, le script `main.py` s'exécute et effectue les opérations suivantes :
 
@@ -50,5 +59,5 @@ Lorsque vous lancez `docker-compose up`, voici les étapes qui s'enchaînent :
     * **Migration des Données** :
         * Le script vérifie si la collection `patients` contient déjà des documents. Si c'est le cas, il la vide complètement (`delete_many({})`).
         * Les données du DataFrame Pandas sont converties en une liste de dictionnaires et insérées en masse (`insert_many(data)`) dans la collection `patients`.
-    * **Vérification** : Pour confirmer que l'opération a réussi, le script affiche les 5 premiers documents de la collection dans les logs du conteneur.
+    * **Vérification** : Pour confirmer que l'opération a réussi, le script affiche les 5 premiers documents de la collection dans les logs du conteneur et vérifie que le nombre d'entrées dans la base correspond bien au nombre initial après déduplication.
     * **Fin du Processus** : La connexion à la base de données est fermée (`client.close()`), le script se termine, et le conteneur `data_migrator_healthcare` s'arrête.

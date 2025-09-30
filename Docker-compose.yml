@@ -7,8 +7,8 @@ services:
     ports:
       - "27017:27017"
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=administratore
-      - MONGO_INITDB_ROOT_PASSWORD=strongPassword!
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASS}
     volumes:
       - mongodb_data:/data/db
   
@@ -21,18 +21,19 @@ services:
       - MONGO_HOST=mongodb
       - MONGO_PORT=27017
       #Root
-      - MONGO_USER=administratore
-      - MONGO_PASS=strongPassword!
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASS=${MONGO_PASS}
       #Utilisateurs
-      - MONGO_ADMIN1_PASS=secureAdmin1
-      - MONGO_ADMIN2_PASS=secureAdmin2
-      - MONGO_EDITOR1_PASS=secureEditor1
-      - MONGO_EDITOR2_PASS=secureEditor2
-      - MONGO_READER1_PASS=secureReader1
-      - MONGO_READER2_PASS=secureReader2
+      - MONGO_ADMIN1_PASS=${MONGO_ADMIN1_PASS}
+      - MONGO_ADMIN2_PASS=${MONGO_ADMIN2_PASS}
+      - MONGO_EDITOR1_PASS=${MONGO_EDITOR1_PASS}
+      - MONGO_EDITOR2_PASS=${MONGO_EDITOR2_PASS}
+      - MONGO_READER1_PASS=${MONGO_READER1_PASS}
+      - MONGO_READER2_PASS=${MONGO_READER2_PASS}
     volumes:
-      - ./healthcare_dataset.csv:/app/healthcare_dataset.csv
+      - ./migration/healthcare_dataset.csv:/app/healthcare_dataset.csv
     command: python /app/main.py
 
 volumes:
   mongodb_data:
+    name: "mongodb_volume_p5"

@@ -22,6 +22,7 @@ READER2_PASS = os.getenv('MONGO_READER2_PASS')
 def connect_to_mongo():
     """Établit la connexion à MongoDB."""
     try:
+        print("Création du client de connexion")
         client = MongoClient(
             host=MONGO_HOST,
             port=MONGO_PORT,
@@ -29,6 +30,7 @@ def connect_to_mongo():
             password=MONGO_PASS,
             authSource='admin' # Authentification avec l'utilisateur admin
         )
+        print("Fait ✅ \n")
         return client
     except Exception as e:
         print(f"Erreur de connexion à MongoDB: {e}")
@@ -63,10 +65,14 @@ def setup_users_and_roles(client):
         }
     ]
 
+
+    print("Création des rôles...")
     for role_info in roles_to_create:
         role_name = role_info["role"]
         db.command("createRole", role_name, privileges=role_info["privileges"], roles=[])
-        print(f"Rôle '{role_name}' créé avec succès.")
+        print(f"Rôle '{role_name}' créé avec succès ✅")
+
+    print("Création des rôles fait ✅ \n")
     
     # Création utilisateurs
     users_to_create = [
@@ -81,24 +87,45 @@ def setup_users_and_roles(client):
     for user_info in users_to_create:
         user_name = user_info["user"]
         db.command("createUser", user_name, pwd=user_info["pwd"], roles=user_info["roles"])
-        print(f"Utilisateur '{user_name}' créé avec succès.")
+        print(f"Utilisateur '{user_name}' créé avec succès! ✅")
+
+    print("Création des utilisateurs fait ✅")
 
 
 if __name__ == "__main__":
     
-    df = pd.read_csv('healthcare_dataset.csv')
-    
-    df.drop_duplicates(inplace=True)
-    df["Name"] = df["Name"].apply(lambda x: x.title())
-    
-    data = df.to_dict('records')
+    print("Début d'execution de la migration")
 
+    print("Importation des données de healthcare_dataset.csv...")
+    df = pd.read_csv('healthcare_dataset.csv')
+    print(f"Le fichier contient {len(df)} entrées avant traitement")
+    print("Fait ✅ \n")
+    
+    print("Suppression des duplicats...")
+    df.drop_duplicates(inplace=True)
+    df_row_count = len(df)
+    print(f"Le jeu de données contient {df_row_count} entrées après traitement")
+    print("Fait ✅ \n")
+
+    print("Capitalisation des noms...")
+    df["Name"] = df["Name"].apply(lambda x: x.title())
+    print("Fait ✅ \n")
+    
+    print("Conversion des données en record...")
+    data = df.to_dict('records')
+    print("Fait ✅ \n")
+
+    print("Connexion au serveur MongoDB...")
     client = connect_to_mongo()
     
     if not client:
         raise Exception("Erreur lors de la connection à la BDD")
+    else:
+        print("Fait ✅ \n")
 
+    print("Création des rôles et utilisateur...")
     setup_users_and_roles(client)
+    print("Création des rôles et utilisateur fait✅ \n")
 
     db = client[DB_NAME]
     collection = db[COLLECTION_NAME]
@@ -106,13 +133,21 @@ if __name__ == "__main__":
     if collection.count_documents({}) > 0:
         print("La collection n'est pas vide. Suppression des données existantes...")
         collection.delete_many({})
+        print("Fait ✅ \n")
     
+    print("Insertion des données dans MongoDB...✅")
     collection.insert_many(data)
+    print("Fait ✅ \n")
+
     cursor = collection.find().limit(5)
+    inserted_count = collection.count_documents({})
+
+    print(f"{inserted_count} / {df_row_count} entrés insérées")
 
     for i in range(5):
         print(cursor[i])
 
+    print("✅La migration a été effectuée avec succès !✅")
     client.close()
     
     
